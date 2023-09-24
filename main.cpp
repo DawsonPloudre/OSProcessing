@@ -96,6 +96,7 @@ int main(int argc, char* argv[])
         for(list<Process>::iterator it = processList.begin(); it != processList.end(); ++it){
           Process& currprocess = *it;
           if(currprocess.state == processing){ // Process is currently running
+          ++currprocess.processorTime;
           taken = true;
             if(currprocess.ioEvents.front().time == time){ // Process issues IoRequest
               stepAction = ioRequest;
@@ -103,7 +104,7 @@ int main(int argc, char* argv[])
               currprocess.ioEvents.pop_front();
               break;
             }
-            else if(currprocess.doneTime == time){ //Process is completed
+            else if(currprocess.processorTime >= currprocess.reqProcessorTime){ //Process is completed
               currprocess.state = done;
               stepAction = complete;
               break;
@@ -145,6 +146,7 @@ int main(int argc, char* argv[])
             if(currprocess.state == ready){
             taken = true;
             currprocess.state = processing;
+            stepAction = beginRun;
             break;
             }
           }
