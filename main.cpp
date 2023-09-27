@@ -111,6 +111,7 @@ int main(int argc, char* argv[])
     	//stepAction = admitNewProc;   //admit a new process into 'ready'
     	//stepAction = handleInterrupt;   //handle an interrupt
     	//stepAction = beginRun;   //start running a process
+	//NOTE: Don't Care about time complexity
     	bool taken = false;
     	for(list<Process>::iterator it = processList.begin(); it != processList.end(); ++it){
       	if(it->state == processing){ // Process is currently running
