@@ -41,7 +41,7 @@ bool processRunning(list<Process>& processes){
     list<Process>::iterator it;
     it = processes.begin();
     for(it = processes.begin(); it != processes.end(); ++it){
-    if(it->state != done){ return false; }
+        if(it->state != done){ return false; }
     }
     return true;
 }
