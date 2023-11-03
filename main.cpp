@@ -111,76 +111,66 @@ int main(int argc, char* argv[])
     	//stepAction = admitNewProc;   //admit a new process into 'ready'
     	//stepAction = handleInterrupt;   //handle an interrupt
     	//stepAction = beginRun;   //start running a process
-	//NOTE: Don't Care about time complexity
     	bool taken = false;
     	for(list<Process>::iterator it = processList.begin(); it != processList.end(); ++it){
       	if(it->state == processing){ // Process is currently running
-      	++it->processorTime;
-      	taken = true;
-        	if(!it->ioEvents.empty() && it->ioEvents.front().time == it->processorTime){ // Process issues IoRequest
-          	stepAction = ioRequest;
-          	it->state = blocked;
-          	ioModule.submitIORequest(time, it->ioEvents.front(), *it);
-          	it->ioEvents.pop_front();
-          	break;
-        	}
-        	else if(it->processorTime >= it->reqProcessorTime){ //Process is completed
-          	it->state = done;
-          	stepAction = complete;
-          	break;
-        	}
-        	else{ // Current process is not interrupted or complete
-          	stepAction = continueRun;
-          	break;
-        	}
-      	}
-
-
+			++it->processorTime;
+			taken = true;
+				if(!it->ioEvents.empty() && it->ioEvents.front().time == it->processorTime){ // Process issues IoRequest
+					stepAction = ioRequest;
+					it->state = blocked;
+					ioModule.submitIORequest(time, it->ioEvents.front(), *it);
+					it->ioEvents.pop_front();
+					break;
+				}
+				else if(it->processorTime >= it->reqProcessorTime){ //Process is completed
+					it->state = done;
+					stepAction = complete;
+					break;
+				}
+				else{ // Current process is not interrupted or complete
+					stepAction = continueRun;
+					break;
+				}
+			}
     	}
-  	if(!taken){
-    	for(list<Process>::iterator it = processList.begin(); it != processList.end(); ++it){ //Check for admitting new process
-      	Process& currprocess = *it;
-      	if(currprocess.state == newArrival && !taken){
-      	taken = true;
-      	currprocess.state = ready;
-      readylist.push_back(it->id);
-      	stepAction = admitNewProc;
-      	break;
-      	}
-    	}
-  	}
-  	if(!taken && !interrupts.empty()){ //Handles interrupt
-    	stepAction = handleInterrupt;
-    	for(list<Process>::iterator it = processList.begin(); it != processList.end(); it++){
-      	if(it->id == interrupts.front().procID){
-        	it->state = ready;
-    	readylist.push_back(it->id);
-      	}
-    	}
-    	interrupts.pop_front();
-    	taken = true;
-  	}
+	if(!taken){
+		for(list<Process>::iterator it = processList.begin(); it != processList.end(); ++it){ //Check for admitting new process
+			Process& currprocess = *it;
+			if(currprocess.state == newArrival && !taken){
+				taken = true;
+				currprocess.state = ready;
+				readylist.push_back(it->id);
+				stepAction = admitNewProc;
+				break;
+			}
+		}
+	}
+	if(!taken && !interrupts.empty()){ //Handles interrupt
+		stepAction = handleInterrupt;
+		for(list<Process>::iterator it = processList.begin(); it != processList.end(); it++){
+			if(it->id == interrupts.front().procID){
+				it->state = ready;
+				readylist.push_back(it->id);
+			}
+		}
+		interrupts.pop_front();
+		taken = true;
+	}
 
 
-  	if(!taken && !readylist.empty()){
-      	for(list<Process>::iterator it = processList.begin(); it != processList.end(); ++it){ //Check for ready processes
-        	Process& currprocess = *it;
-        	if(currprocess.id == readylist.front()){
-        	taken = true;
-        	currprocess.state = processing;
-    	readylist.pop_front();
-        	stepAction = beginRun;
-        	break;
-        	}
-      	}
-  	}
-
-
-
-
-
-
-
+	if(!taken && !readylist.empty()){ //Start running a ready process
+		for(list<Process>::iterator it = processList.begin(); it != processList.end(); ++it){ //Check for ready processes
+			Process& currprocess = *it;
+			if(currprocess.id == readylist.front()){
+				taken = true;
+				currprocess.state = processing;
+				readylist.pop_front();
+				stepAction = beginRun;
+				break;
+			}
+		}
+	}
 
 
 
@@ -223,5 +213,4 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-
 
